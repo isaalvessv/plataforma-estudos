@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Base Exatas • Engenharia de Software (Federal)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#0b0f19',
+            card: '#131b2e',
+            borderSubtle: '#1e293b',
+            math: '#38bdf8',
+            phys: '#a855f7',
+            chem: '#10b981',
+            sim: '#f59e0b'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b0f19; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    .glass { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+    .tab-btn-active {
+      background: linear-gradient(135deg, rgba(56, 189, 248, 0.14), rgba(168, 85, 247, 0.14));
+      border-color: rgba(56, 189, 248, 0.5);
+      color: #f8fafc;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #38bdf8;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body class="bg-obsidian text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-sky-500/30 selection:text-sky-200">
+
+  <!-- Toast Flutuante -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Modal Dinâmico (Edição de Dia / Confirmação / Backup) -->
+  <div id="modal-overlay" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4 glass">
+    <div class="bg-card border border-borderSubtle rounded-2xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-borderSubtle flex items-center justify-between">
+        <h3 id="modal-title" class="text-base sm:text-lg font-bold text-slate-100 flex items-center gap-2">Título</h3>
+        <button onclick="closeModal()" class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition" aria-label="Fechar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="modal-body" class="p-6 overflow-y-auto space-y-4 text-sm"></div>
+      <div id="modal-footer" class="px-6 py-3.5 border-t border-borderSubtle bg-obsidian/60 flex justify-end gap-3"></div>
+    </div>
+  </div>
+
+  <!-- Cabeçalho Fixo -->
+  <header class="sticky top-0 z-40 border-b border-borderSubtle bg-obsidian/90 glass">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <!-- Identidade -->
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 via-purple-500 to-emerald-400 flex items-center justify-center text-obsidian font-mono font-extrabold text-base shadow-lg shadow-sky-500/20 shrink-0">
+          &lt;/&gt;
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="font-extrabold text-sm sm:text-lg tracking-tight text-white truncate">Base Exatas • Engenharia de Software (Federal)</h1>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 text-[11px] text-slate-400 font-mono">
+            <span>25/11/2026 a 22/12/2026 (28 dias)</span>
+            <span class="hidden md:inline text-slate-600">•</span>
+            <span class="hidden md:inline-flex items-center gap-1 text-sky-400">
+              <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.2-.08-.06-.19-.04-.27-.02-.12.02-1.96 1.25-5.54 3.69-.52.36-1 .53-1.42.52-.47-.01-1.37-.26-2.03-.48-.82-.27-1.47-.42-1.42-.88.03-.24.35-.49.96-.75 3.78-1.65 6.31-2.74 7.58-3.27 3.61-1.51 4.35-1.77 4.84-1.78.11 0 .35.03.5.16.13.1.17.24.18.34.02.07.02.21 0 .33z"/></svg>
+              Aulas: Plataforma Pedro Assaad (Telegram)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini-Widget Timer de Foco no Topo -->
+      <div class="flex items-center gap-2 bg-card border border-borderSubtle px-3 py-1.5 rounded-xl shrink-0">
+        <span id="mini-timer-subject-dot" class="w-2.5 h-2.5 rounded-full bg-sky-400"></span>
+        <span id="mini-timer-display" class="font-mono font-bold text-sm tabular-nums text-white">45:00</span>
+        <button onclick="toggleTimer()" id="mini-timer-btn" class="p-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-obsidian font-bold transition" title="Iniciar / Pausar Timer">
+          <svg id="mini-icon-play" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+          <svg id="mini-icon-pause" class="w-3.5 h-3.5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zm7 0a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
+        </button>
+        <button onclick="switchTab('timer')" class="hidden sm:inline text-[11px] font-mono text-slate-400 hover:text-sky-400 underline ml-0.5">Timer</button>
+      </div>
+
+      <!-- Backup JSON -->
+      <button onclick="openBackupModal()" class="p-2.5 rounded-xl bg-card border border-borderSubtle hover:border-sky-400/50 text-slate-300 transition text-xs font-semibold flex items-center gap-1.5 shrink-0" title="Exportar ou Importar Backup JSON">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        <span class="hidden sm:inline">Backup</span>
+      </button>
+    </div>
+
+    <!-- Navegação por Abas -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 overflow-x-auto border-t border-borderSubtle/70">
+      <div class="flex items-center gap-1.5 py-2 min-w-max">
+        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn tab-btn-active px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-transparent flex items-center gap-2 transition">
+          <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+          Dashboard Estratégico
+        </button>
+        <button onclick="switchTab('cronograma')" data-tab="cronograma" class="nav-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-transparent text-slate-400 hover:text-white flex items-center gap-2 transition">
+          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Cronograma Semanal Editável
+        </button>
+        <button onclick="switchTab('simulados')" data-tab="simulados" class="nav-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-transparent text-slate-400 hover:text-white flex items-center gap-2 transition">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Mini Simulados Acumulativos
+        </button>
+        <button onclick="switchTab('timer')" data-tab="timer" class="nav-btn px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold border border-transparent text-slate-400 hover:text-white flex items-center gap-2 transition">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          Timer de Foco Customizável
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- =================================================================== -->
+    <!-- ABA 1: DASHBOARD ESTRATÉGICO                                        -->
+    <!-- =================================================================== -->
+    <section id="tab-dashboard" class="tab-panel space-y-6">
+      <!-- Banner de Missão -->
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-card via-[#15203b] to-obsidian border border-sky-500/25 p-6 sm:p-7 shadow-xl">
+        <div class="absolute -right-12 -top-12 w-60 h-60 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div class="max-w-2xl">
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/15 border border-sky-400/30 text-sky-300 text-xs font-mono font-semibold">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Rumo à Engenharia de Software • Universidade Federal
+              </span>
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-400/30 text-purple-300 text-xs font-mono">
+                Aulas: Plataforma Pedro Assaad (Telegram)
+              </span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">
+              Intensivo de 4 Semanas: Alicerce Inabalável em Exatas
+            </h2>
+            <p class="text-slate-300 text-xs sm:text-sm mt-2 leading-relaxed">
+              Ciclo de <strong class="text-white">25/11/2026 a 22/12/2026 (28 dias)</strong> estruturado para blindar <span class="text-sky-400 font-semibold">Matemática Básica</span>, <span class="text-purple-400 font-semibold">Física Básica</span> e <span class="text-emerald-400 font-semibold">Química Básica</span> antes de avançar para os tópicos pesados do ENEM e vestibulares.
+            </p>
+          </div>
+
+          <!-- Tempo Líquido Focado -->
+          <div class="bg-obsidian/80 border border-borderSubtle rounded-2xl p-4 sm:p-5 min-w-[240px] text-center">
+            <p class="text-[11px] font-mono uppercase tracking-widest text-slate-400">Tempo Líquido Registrado</p>
+            <div class="mt-1.5 flex items-baseline justify-center gap-1.5">
+              <span id="kpi-focus-hours" class="text-3xl sm:text-4xl font-black font-mono text-sky-400">0h 00m</span>
+            </div>
+            <p id="kpi-focus-breakdown" class="text-[11px] text-slate-400 mt-1.5 font-mono">
+              Mat: 0m • Fís: 0m • Quím: 0m
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs em Tempo Real -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-card border border-borderSubtle rounded-2xl p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span>Progresso Geral (4 Sem)</span>
+            <span class="text-sky-400 font-mono">28 dias</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="kpi-overall-pct" class="text-3xl font-extrabold font-mono text-white">0%</span>
+            <span id="kpi-days-done" class="text-xs text-slate-400">0/20 dias de estudo</span>
+          </div>
+          <div class="mt-3 w-full bg-obsidian h-2 rounded-full overflow-hidden">
+            <div id="kpi-overall-bar" class="bg-gradient-to-r from-sky-400 via-purple-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <div class="bg-card border border-borderSubtle rounded-2xl p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span>Tópicos Concluídos</span>
+            <span class="text-purple-400 font-mono">Base</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="kpi-topics-done" class="text-3xl font-extrabold font-mono text-white">0</span>
+            <span id="kpi-topics-total" class="text-xs text-slate-400">/ 0 tópicos</span>
+          </div>
+          <p class="mt-3 text-xs text-slate-400">Aulas + Resumos + Listas</p>
+        </div>
+
+        <div class="bg-card border border-borderSubtle rounded-2xl p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span>Questões Resolvidas</span>
+            <span class="text-emerald-400 font-mono">Prática</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="kpi-questions-done" class="text-3xl font-extrabold font-mono text-white">0</span>
+            <span id="kpi-questions-acc" class="text-xs text-emerald-400 font-mono">(0% acerto)</span>
+          </div>
+          <p id="kpi-questions-target" class="mt-3 text-xs text-slate-400">Meta total do ciclo: 0 questões</p>
+        </div>
+
+        <div class="bg-card border border-borderSubtle rounded-2xl p-5">
+          <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider">
+            <span>Média Mini Simulados</span>
+            <span class="text-amber-400 font-mono">Acumulativo</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-2">
+            <span id="kpi-sim-avg" class="text-3xl font-extrabold font-mono text-amber-400">--%</span>
+            <span id="kpi-sim-count" class="text-xs text-slate-400">0/4 realizados</span>
+          </div>
+          <p class="mt-3 text-xs text-slate-400">Alvo de domínio: <strong class="text-amber-400">80%+</strong></p>
+        </div>
+      </div>
+
+      <!-- Barras por Disciplina + Próxima Meta -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Barras Individuais -->
+        <div class="lg:col-span-2 bg-card border border-borderSubtle rounded-2xl p-6 space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-white">Desempenho por Disciplina</h3>
+              <p class="text-xs text-slate-400">Aulas assistidas no Pedro Assaad (Telegram) e volume de questões</p>
+            </div>
+          </div>
+
+          <!-- Matemática Básica -->
+          <div class="p-4 rounded-xl bg-obsidian/70 border border-sky-500/20">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-sky-400"></span>
+                <span class="font-bold text-sm text-sky-400">Matemática Básica</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-mono text-slate-300">
+                <span id="sub-math-aulas">0/0 aulas</span>
+                <span>•</span>
+                <span id="sub-math-qs" class="text-sky-400 font-bold">0 questões</span>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div id="sub-math-bar" class="bg-sky-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Física Básica -->
+          <div class="p-4 rounded-xl bg-obsidian/70 border border-purple-500/20">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+                <span class="font-bold text-sm text-purple-400">Física Básica</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-mono text-slate-300">
+                <span id="sub-phys-aulas">0/0 aulas</span>
+                <span>•</span>
+                <span id="sub-phys-qs" class="text-purple-400 font-bold">0 questões</span>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div id="sub-phys-bar" class="bg-purple-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Química Básica -->
+          <div class="p-4 rounded-xl bg-obsidian/70 border border-emerald-500/20">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+                <span class="font-bold text-sm text-emerald-400">Química Básica</span>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-mono text-slate-300">
+                <span id="sub-chem-aulas">0/0 aulas</span>
+                <span>•</span>
+                <span id="sub-chem-qs" class="text-emerald-400 font-bold">0 questões</span>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+              <div id="sub-chem-bar" class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card de Próxima Meta / Dia Atual -->
+        <div class="bg-card border border-borderSubtle rounded-2xl p-6 flex flex-col justify-between">
+          <div>
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-400 text-xs font-mono font-bold mb-3">
+              PRÓXIMA MISSÃO NO CRONOGRAMA
+            </span>
+            <div id="next-mission-box" class="space-y-2">
+              <!-- Preenchido via JS -->
+            </div>
+          </div>
+
+          <button onclick="switchTab('cronograma')" class="mt-6 w-full py-2.5 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-obsidian font-bold text-sm transition shadow-lg shadow-sky-500/20">
+            Abrir Cronograma Semanal →
+          </button>
+        </div>
+      </div>
+
+      <!-- Painel Rápido de Fórmulas Essenciais de Base -->
+      <div class="bg-card border border-borderSubtle rounded-2xl p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-5">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-white">Painel Rápido de Fórmulas & Regras Essenciais de Base</h3>
+            <p class="text-xs text-slate-400">Consulta imediata durante as listas de exercícios e mini simulados</p>
+          </div>
+          <span class="text-xs font-mono text-slate-400">Cheat Sheet • Exatas</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 text-xs">
+          <!-- Bloco 1: Potenciação e Radiciação -->
+          <div class="p-4 rounded-xl bg-obsidian border border-sky-500/25 space-y-2">
+            <h4 class="font-bold text-sky-400 text-sm flex items-center gap-1.5">
+              <span>⚡</span> Potenciação & Radiciação
+            </h4>
+            <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+              <li>• aᵐ · aⁿ = aᵐ⁺ⁿ</li>
+              <li>• aᵐ / aⁿ = aᵐ⁻ⁿ (a ≠ 0)</li>
+              <li>• (aᵐ)ⁿ = aᵐ·ⁿ</li>
+              <li>• a⁻ⁿ = 1 / aⁿ</li>
+              <li>• a^(m/n) = ⁿ√(aᵐ)</li>
+              <li>• √(a·b) = √a · √b</li>
+              <li>• Prod. Notável: (a±b)² = a² ± 2ab + b²</li>
+              <li>• Dif. Quadrados: a² - b² = (a+b)(a-b)</li>
+            </ul>
+          </div>
+
+          <!-- Bloco 2: Razão, Proporção e Porcentagem -->
+          <div class="p-4 rounded-xl bg-obsidian border border-sky-500/25 space-y-2">
+            <h4 class="font-bold text-sky-400 text-sm flex items-center gap-1.5">
+              <span>📊</span> Razão, Proporção & %
+            </h4>
+            <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+              <li>• Escala: E = d(desenho) / D(real)</li>
+              <li>• Área na Escala: A_des / A_real = E²</li>
+              <li>• Volume na Escala: V_des / V_real = E³</li>
+              <li>• Aumento de i%: V_f = V_0 · (1 + i)</li>
+              <li>• Desconto de i%: V_f = V_0 · (1 - i)</li>
+              <li>• Juros Simples: J = C · i · t</li>
+              <li>• Juros Compostos: M = C · (1 + i)ᵗ</li>
+            </ul>
+          </div>
+
+          <!-- Bloco 3: Grandezas, Notação Científica & Vetores -->
+          <div class="p-4 rounded-xl bg-obsidian border border-purple-500/25 space-y-2">
+            <h4 class="font-bold text-purple-400 text-sm flex items-center gap-1.5">
+              <span>🚀</span> Grandezas, Notação & Vetores
+            </h4>
+            <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+              <li>• Notação: N = a · 10ⁿ (1 ≤ |a| &lt; 10)</li>
+              <li>• Vel.: ÷ 3,6 (km/h → m/s) | × 3,6 (inv)</li>
+              <li>• 1 m³ = 1.000 L | 1 cm³ = 1 mL</li>
+              <li>• Vetor Resultante (90°): R = √(A² + B²)</li>
+              <li>• Decomposição: Fx = F·cosθ | Fy = F·senθ</li>
+              <li>• MRU: S = S₀ + v·t</li>
+              <li>• MRUV: v = v₀ + a·t | v² = v₀² + 2aΔS</li>
+            </ul>
+          </div>
+
+          <!-- Bloco 4: Tabela Periódica, Separação & Estequiometria -->
+          <div class="p-4 rounded-xl bg-obsidian border border-emerald-500/25 space-y-2">
+            <h4 class="font-bold text-emerald-400 text-sm flex items-center gap-1.5">
+              <span>🧪</span> Química Básica & Mol
+            </h4>
+            <ul class="space-y-1.5 font-mono text-[11px] text-slate-300">
+              <li>• Átomo: Z = p | A = p + n | Íon: e⁻ = Z - q</li>
+              <li>• Tabela: Raio ↑ (← e ↓) | EN ↑ (→ e ↑)</li>
+              <li>• Ligações: Met+Amet (Iônica) | Amet+Amet (Cov)</li>
+              <li>• Separação: Destilação (PE) | Filtração (Sol/Líq)</li>
+              <li>• 1 mol = 6,02 · 10²³ entidades = M (g)</li>
+              <li>• CNTP: 1 mol de gás = 22,4 L (0°C, 1 atm)</li>
+              <li>• Densidade: d = m / V</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 2: CRONOGRAMA SEMANAL EDITÁVEL (4 SEMANAS: 25/11 A 22/12/2026)  -->
+    <!-- =================================================================== -->
+    <section id="tab-cronograma" class="tab-panel hidden space-y-6">
+      <!-- Barra Superior de Controle da Semana -->
+      <div class="bg-card border border-borderSubtle rounded-2xl p-5 space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <span id="week-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-sky-500/15 text-sky-400 border border-sky-500/30">
+                SEMANA 1 DE 4
+              </span>
+              <span id="week-sim-info" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-amber-500/15 text-amber-400">
+                Meta Mini Simulado: 25 questões
+              </span>
+            </div>
+            <h2 id="week-heading" class="text-lg sm:text-xl font-extrabold text-white mt-1.5">
+              25/11 a 01/12 • Fundamentos Numéricos, Unidades/Vetores e Matéria/Átomo
+            </h2>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="confirmResetSchedule()" class="px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle hover:border-rose-500/50 text-xs font-semibold text-slate-300 hover:text-rose-400 transition flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              Restaurar Padrão
+            </button>
+          </div>
+        </div>
+
+        <!-- Botões das 4 Semanas -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+          <button onclick="selectWeek(0)" data-week="0" class="week-tab-btn p-3 rounded-xl border text-left transition">
+            <div class="font-mono text-xs font-bold">Semana 1 • 25/11–01/12</div>
+            <div class="text-[11px] text-slate-400 truncate mt-0.5">Fundamentos, Vetores & Átomo</div>
+          </button>
+          <button onclick="selectWeek(1)" data-week="1" class="week-tab-btn p-3 rounded-xl border text-left transition">
+            <div class="font-mono text-xs font-bold">Semana 2 • 02/12–08/12</div>
+            <div class="text-[11px] text-slate-400 truncate mt-0.5">Álgebra, Cinemática & Ligações</div>
+          </button>
+          <button onclick="selectWeek(2)" data-week="2" class="week-tab-btn p-3 rounded-xl border text-left transition">
+            <div class="font-mono text-xs font-bold">Semana 3 • 09/12–15/12</div>
+            <div class="text-[11px] text-slate-400 truncate mt-0.5">Proporção/%, Newton & Inorgânica</div>
+          </button>
+          <button onclick="selectWeek(3)" data-week="3" class="week-tab-btn p-3 rounded-xl border text-left transition">
+            <div class="font-mono text-xs font-bold">Semana 4 • 16/12–22/12</div>
+            <div class="text-[11px] text-slate-400 truncate mt-0.5">Geometria/Funções, Energia & Mol</div>
+          </button>
+        </div>
+
+        <!-- Dica do Dia Livre Flexível -->
+        <div class="p-3 rounded-xl bg-obsidian/80 border border-borderSubtle flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-300">
+          <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold">✨ Dia Livre Flexível:</span>
+            <span>Clique em <strong>"Definir Dia Livre"</strong> em qualquer card abaixo para trocar automaticamente seu dia de descanso nesta semana.</span>
+          </div>
+          <span id="week-progress-label" class="font-mono font-bold text-sky-400 shrink-0">0/6 dias concluídos</span>
+        </div>
+      </div>
+
+      <!-- Grade dos 7 Dias da Semana Selecionada -->
+      <div id="days-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <!-- Cards renderizados dinamicamente -->
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 3: REGISTRO DOS MINI SIMULADOS ACUMULATIVOS                     -->
+    <!-- =================================================================== -->
+    <section id="tab-simulados" class="tab-panel hidden space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Formulário de Lançamento (5 colunas) -->
+        <div class="lg:col-span-5 bg-card border border-borderSubtle rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-1">
+            <h3 id="sim-form-title" class="text-lg font-bold text-white">Registrar Mini Simulado</h3>
+            <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-amber-500/15 text-amber-400">Acumulativo</span>
+          </div>
+          <p class="text-xs text-slate-400 mb-4">Metas sugeridas: S1 = 25q • S2 = 35q • S3 = 45q • S4 = 60q</p>
+
+          <form id="sim-form" onsubmit="saveSimulado(event)" class="space-y-3.5">
+            <input type="hidden" id="sim-edit-id" value="" />
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Semana Referente</label>
+                <select id="sim-week" onchange="autoFillSimQuestions()" class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm focus:outline-none focus:border-amber-400">
+                  <option value="Semana 1 (25q)">Semana 1 (Meta 25q)</option>
+                  <option value="Semana 2 (35q)">Semana 2 (Meta 35q)</option>
+                  <option value="Semana 3 (45q)">Semana 3 (Meta 45q)</option>
+                  <option value="Semana 4 (60q)">Semana 4 (Meta 60q)</option>
+                  <option value="Simulado Extra">Simulado Extra</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Data</label>
+                <input type="date" id="sim-date" required class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm focus:outline-none focus:border-amber-400" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Total de Questões</label>
+                <input type="number" id="sim-total-q" min="1" max="180" value="25" required class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm font-mono focus:outline-none focus:border-amber-400" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Tempo Gasto (min)</label>
+                <input type="number" id="sim-time" min="1" max="400" placeholder="Ex: 75" required class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm font-mono focus:outline-none focus:border-amber-400" />
+              </div>
+            </div>
+
+            <!-- Acertos por Disciplina -->
+            <div class="p-3.5 rounded-xl bg-obsidian/80 border border-borderSubtle space-y-3">
+              <p class="text-[11px] font-mono uppercase tracking-wider text-slate-400">Acertos por Matéria de Base</p>
+              <div class="grid grid-cols-3 gap-2.5">
+                <div>
+                  <label class="block text-[11px] font-semibold text-sky-400 mb-1">Mat. Básica</label>
+                  <input type="number" id="sim-ac-math" min="0" max="90" value="0" required class="w-full px-2.5 py-1.5 rounded-lg bg-card border border-sky-500/30 text-sm font-mono text-center focus:outline-none focus:border-sky-400" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-purple-400 mb-1">Fís. Básica</label>
+                  <input type="number" id="sim-ac-phys" min="0" max="90" value="0" required class="w-full px-2.5 py-1.5 rounded-lg bg-card border border-purple-500/30 text-sm font-mono text-center focus:outline-none focus:border-purple-400" />
+                </div>
+                <div>
+                  <label class="block text-[11px] font-semibold text-emerald-400 mb-1">Quím. Básica</label>
+                  <input type="number" id="sim-ac-chem" min="0" max="90" value="0" required class="w-full px-2.5 py-1.5 rounded-lg bg-card border border-emerald-500/30 text-sm font-mono text-center focus:outline-none focus:border-emerald-400" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Principais Erros / Lacunas Identificadas</label>
+              <textarea id="sim-gaps" rows="2" placeholder="Ex: Errei conversão de unidades em Física e balanceamento por tentativa..." class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-xs sm:text-sm focus:outline-none focus:border-amber-400"></textarea>
+            </div>
+
+            <div class="flex gap-2 pt-1">
+              <button type="submit" id="sim-submit-btn" class="flex-1 py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-obsidian font-bold text-sm transition shadow-lg shadow-amber-500/20">
+                Salvar Mini Simulado
+              </button>
+              <button type="button" id="sim-cancel-edit" onclick="cancelEditSimulado()" class="hidden px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold transition">
+                Cancelar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Gráfico SVG/Canvas Dinâmico + Histórico (7 colunas) -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="bg-card border border-borderSubtle rounded-2xl p-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-white">Evolução de Aproveitamento (%)</h3>
+                <p class="text-xs text-slate-400">Curva geral dos simulados acumulativos e comparativo por matéria</p>
+              </div>
+              <div id="subject-sim-bars" class="flex items-center gap-3 text-xs font-mono">
+                <span class="text-sky-400">Mat: <strong id="avg-sim-math">0</strong> acertos</span>
+                <span class="text-purple-400">Fís: <strong id="avg-sim-phys">0</strong> acertos</span>
+                <span class="text-emerald-400">Quím: <strong id="avg-sim-chem">0</strong> acertos</span>
+              </div>
+            </div>
+
+            <!-- Canvas Nativo para Gráfico Vetorial Nítido -->
+            <div class="w-full h-60 bg-obsidian/70 border border-borderSubtle rounded-xl p-3 relative">
+              <canvas id="sim-chart-canvas" class="w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <!-- Histórico de Simulados -->
+          <div class="bg-card border border-borderSubtle rounded-2xl p-6">
+            <h3 class="text-base font-bold text-white mb-3">Histórico dos Mini Simulados</h3>
+            <div id="sim-history-list" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+              <!-- Renderizado via JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- ABA 4: TIMER DE FOCO CUSTOMIZÁVEL                                   -->
+    <!-- =================================================================== -->
+    <section id="tab-timer" class="tab-panel hidden">
+      <div class="max-w-3xl mx-auto bg-card border border-borderSubtle rounded-2xl p-6 sm:p-8 shadow-xl">
+        <div class="text-center mb-6">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/15 text-sky-400 font-mono text-xs font-bold mb-2">
+            DEEP WORK • ENGENHARIA DE SOFTWARE
+          </span>
+          <h2 class="text-2xl font-extrabold text-white">Timer de Foco Customizável</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Escolha a matéria, ajuste livremente os minutos de foco (1 a 180 min) e registre seu tempo líquido automaticamente no Dashboard.
+          </p>
+        </div>
+
+        <!-- Seletor de Matéria em Estudo -->
+        <div class="mb-6">
+          <label class="block text-xs font-mono uppercase tracking-wider text-slate-400 text-center mb-2.5">Matéria em Foco Agora</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button onclick="setTimerSubject('math')" data-tsub="math" class="tsub-btn p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400"></span> Matemática
+            </button>
+            <button onclick="setTimerSubject('phys')" data-tsub="phys" class="tsub-btn p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Física
+            </button>
+            <button onclick="setTimerSubject('chem')" data-tsub="chem" class="tsub-btn p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Química
+            </button>
+            <button onclick="setTimerSubject('sim')" data-tsub="sim" class="tsub-btn p-2.5 rounded-xl border text-xs font-bold transition flex items-center justify-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Simulado
+            </button>
+          </div>
+        </div>
+
+        <!-- Presets Rápidos + Slider/Input Customizável (1 a 180 min) -->
+        <div class="bg-obsidian/80 border border-borderSubtle rounded-2xl p-5 mb-6 space-y-4">
+          <div class="flex flex-wrap items-center justify-center gap-2">
+            <button onclick="applyFocusPreset(25)" class="px-3 py-1.5 rounded-xl bg-card hover:border-sky-400 border border-borderSubtle text-xs font-mono font-semibold transition">25m Pomodoro</button>
+            <button onclick="applyFocusPreset(45)" class="px-3 py-1.5 rounded-xl bg-card hover:border-sky-400 border border-borderSubtle text-xs font-mono font-semibold transition">45m Bloco Exatas</button>
+            <button onclick="applyFocusPreset(60)" class="px-3 py-1.5 rounded-xl bg-card hover:border-sky-400 border border-borderSubtle text-xs font-mono font-semibold transition">60m Deep Work</button>
+            <button onclick="applyFocusPreset(90)" class="px-3 py-1.5 rounded-xl bg-card hover:border-sky-400 border border-borderSubtle text-xs font-mono font-semibold transition">90m Simulado</button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-borderSubtle/70">
+            <!-- Tempo de Foco Customizável -->
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <label for="custom-focus-input" class="font-semibold text-slate-300">Tempo de Foco (1–180 min):</label>
+                <input type="number" id="custom-focus-input" min="1" max="180" value="45" onchange="updateCustomFocus(this.value)" class="w-16 px-2 py-1 rounded-lg bg-card border border-sky-500/40 font-mono font-bold text-center text-sky-400 text-xs" />
+              </div>
+              <input type="range" id="custom-focus-slider" min="1" max="180" value="45" oninput="updateCustomFocus(this.value)" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            </div>
+
+            <!-- Tempo de Pausa Customizável -->
+            <div>
+              <div class="flex items-center justify-between text-xs mb-1.5">
+                <label for="custom-break-input" class="font-semibold text-slate-300">Tempo de Pausa (5–30 min):</label>
+                <input type="number" id="custom-break-input" min="5" max="30" value="10" onchange="updateCustomBreak(this.value)" class="w-16 px-2 py-1 rounded-lg bg-card border border-emerald-500/40 font-mono font-bold text-center text-emerald-400 text-xs" />
+              </div>
+              <input type="range" id="custom-break-slider" min="5" max="30" value="10" oninput="updateCustomBreak(this.value)" class="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Visor Principal do Cronômetro -->
+        <div class="py-8 px-4 rounded-2xl bg-obsidian border border-borderSubtle text-center mb-6 relative overflow-hidden">
+          <div id="timer-progress-bg" class="absolute bottom-0 left-0 h-1.5 bg-gradient-to-r from-sky-400 via-purple-500 to-emerald-400 transition-all duration-500" style="width: 100%"></div>
+          <div class="flex items-center justify-center gap-2 mb-2">
+            <span id="timer-phase-badge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-sky-500/15 text-sky-400">
+              MODO FOCO • MATEMÁTICA BÁSICA
+            </span>
+          </div>
+          <div id="main-timer-display" class="text-6xl sm:text-7xl font-black font-mono tabular-nums tracking-tight text-white">
+            45:00
+          </div>
+          <p class="text-xs text-slate-400 mt-3 font-mono">
+            Ao concluir o ciclo de foco, os minutos são somados automaticamente ao seu Dashboard.
+          </p>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button onclick="toggleTimer()" id="main-timer-btn" class="px-8 py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-obsidian font-extrabold text-sm transition shadow-lg shadow-sky-500/25">
+            Iniciar Foco
+          </button>
+          <button onclick="switchTimerPhase()" class="px-5 py-3.5 rounded-xl bg-obsidian border border-borderSubtle hover:border-emerald-400/50 text-slate-200 font-semibold text-sm transition">
+            Alternar Foco / Pausa
+          </button>
+          <button onclick="resetTimer()" class="px-5 py-3.5 rounded-xl bg-obsidian border border-borderSubtle hover:border-slate-500 text-slate-400 hover:text-white font-semibold text-sm transition">
+            Resetar
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-borderSubtle py-5 text-center text-xs text-slate-500 font-mono">
+    Base Exatas • Engenharia de Software (Universidade Federal) • 25/11/2026 a 22/12/2026
+  </footer>
+
+  <!-- ===================================================================== -->
+  <!-- LÓGICA COMPLETA EM JAVASCRIPT PURO                                    -->
+  <!-- ===================================================================== -->
+  <script>
+    // =======================================================================
+    // 1. DADOS PADRÃO DAS 4 SEMANAS (25/11/2026 A 22/12/2026)
+    // =======================================================================
+    function createDefaultSchedule() {
+      return [
+        {
+          weekNum: 1,
+          period: "25/11 a 01/12",
+          theme: "Fundamentos Numéricos, Unidades/Vetores e Matéria/Átomo",
+          simTarget: 25,
+          days: [
+            {
+              id: "w1_d1",
+              dateStr: "25/11",
+              weekday: "Quarta-feira",
+              subject: "math",
+              title: "Operações Fundamentais, Frações, MDC e MMC",
+              topics: [
+                "Expressões numéricas e critérios de divisibilidade",
+                "Operações com frações e números decimais",
+                "Problemas contextualizados de MMC e MDC (padrão ENEM)"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Módulo 01 Matemática Básica"
+            },
+            {
+              id: "w1_d2",
+              dateStr: "26/11",
+              weekday: "Quinta-feira",
+              subject: "phys",
+              title: "Grandezas Físicas, SI, Notação Científica e Ordem de Grandeza",
+              topics: [
+                "Sistema Internacional de Unidades (SI) e prefixos (kilo, mili, micro, nano)",
+                "Conversão de unidades (comprimento, área, volume e velocidade)",
+                "Notação científica e cálculo de Ordem de Grandeza"
+              ],
+              qTarget: 25,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Introdução à Física"
+            },
+            {
+              id: "w1_d3",
+              dateStr: "27/11",
+              weekday: "Sexta-feira",
+              subject: "chem",
+              title: "Matéria, Estados Físicos, Substâncias e Separação de Misturas",
+              topics: [
+                "Mudanças de estado físico e gráficos de aquecimento (Pura vs Mistura)",
+                "Substâncias simples, compostas, misturas homogêneas e heterogêneas",
+                "Processos de separação de misturas (Destilação, Filtração, Decantação)"
+              ],
+              qTarget: 25,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Química Geral Aula 01–03"
+            },
+            {
+              id: "w1_d4",
+              dateStr: "28/11",
+              weekday: "Sábado",
+              subject: "math",
+              title: "Potenciação, Radiciação e Racionalização de Denominadores",
+              topics: [
+                "Propriedades operatórias das potências e potências de base 10",
+                "Propriedades dos radicais e simplificação de raízes",
+                "Racionalização de denominadores"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Módulo 02 Matemática Básica"
+            },
+            {
+              id: "w1_d5",
+              dateStr: "29/11",
+              weekday: "Domingo",
+              subject: "free",
+              title: "Dia Livre Flexível (Descanso & Recuperação)",
+              topics: [
+                "Dia reservado para descanso mental ou reposição leve opcional"
+              ],
+              qTarget: 0,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Você pode trocar este dia livre para qualquer dia da semana!"
+            },
+            {
+              id: "w1_d6",
+              dateStr: "30/11",
+              weekday: "Segunda-feira",
+              subject: "phys",
+              title: "Vetores, Decomposição Vetorial + Estrutura Atômica (Química)",
+              topics: [
+                "[Física] Grandezas escalares vs vetoriais, soma e decomposição (sen/cos)",
+                "[Química] Modelos atômicos (Dalton, Thomson, Rutherford, Bohr) e Íons",
+                "Semelhanças atômicas: Isótopos, Isóbaros e Isótonos"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Vetores + Atomística"
+            },
+            {
+              id: "w1_d7",
+              dateStr: "01/12",
+              weekday: "Terça-feira",
+              subject: "sim",
+              title: "Mini Simulado Acumulativo 01 (25 Questões)",
+              topics: [
+                "10q Matemática Básica + 8q Física Básica + 7q Química Básica",
+                "Cronometrar 75 minutos e registrar acertos na aba Mini Simulados"
+              ],
+              qTarget: 25,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Conteúdo acumulado da Semana 1"
+            }
+          ]
+        },
+        {
+          weekNum: 2,
+          period: "02/12 a 08/12",
+          theme: "Álgebra/Equações, Cinemática Básica e Tabela Periódica/Ligações",
+          simTarget: 35,
+          days: [
+            {
+              id: "w2_d1",
+              dateStr: "02/12",
+              weekday: "Quarta-feira",
+              subject: "math",
+              title: "Produtos Notáveis, Fatoração Algébrica e Simplificação",
+              topics: [
+                "Quadrado da soma/diferença e produto da soma pela diferença",
+                "Fator comum em evidência, agrupamento e trinômio quadrado perfeito",
+                "Simplificação de frações algébricas"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Álgebra Básica"
+            },
+            {
+              id: "w2_d2",
+              dateStr: "03/12",
+              weekday: "Quinta-feira",
+              subject: "phys",
+              title: "Cinemática Escalar: Velocidade Média, MRU e Gráficos",
+              topics: [
+                "Referencial, trajetória, deslocamento escalar e velocidade média",
+                "Movimento Retilíneo Uniforme (S = S₀ + v·t) e encontros",
+                "Leitura e interpretação de gráficos S × t e v × t"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Cinemática Parte 1"
+            },
+            {
+              id: "w2_d3",
+              dateStr: "04/12",
+              weekday: "Sexta-feira",
+              subject: "chem",
+              title: "Distribuição Eletrônica (Linus Pauling) e Tabela Periódica",
+              topics: [
+                "Diagrama de Linus Pauling (átomos neutros e íons) e camada de valência",
+                "Organização da Tabela Periódica: grupos, períodos e classificação",
+                "Propriedades periódicas: Raio Atômico, Eletronegatividade e Energia de Ionização"
+              ],
+              qTarget: 25,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Tabela Periódica"
+            },
+            {
+              id: "w2_d4",
+              dateStr: "05/12",
+              weekday: "Sábado",
+              subject: "math",
+              title: "Equações do 1º e 2º Grau, Sistemas Lineares e Inequações",
+              topics: [
+                "Resolução e interpretação de problemas com Equação do 1º Grau e Sistemas",
+                "Equação do 2º Grau: Bhaskara, Soma e Produto das raízes",
+                "Inequações do 1º Grau e estudo de sinais"
+              ],
+              qTarget: 35,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Equações e Sistemas"
+            },
+            {
+              id: "w2_d5",
+              dateStr: "06/12",
+              weekday: "Domingo",
+              subject: "free",
+              title: "Dia Livre Flexível (Descanso & Recuperação)",
+              topics: [
+                "Dia livre para recarregar as energias ou trocar por outro dia da semana"
+              ],
+              qTarget: 0,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Clique em 'Definir Dia Livre' em outro card se precisar mudar"
+            },
+            {
+              id: "w2_d6",
+              dateStr: "07/12",
+              weekday: "Segunda-feira",
+              subject: "chem",
+              title: "Ligações Químicas (Iônica, Covalente, Metálica) + MRUV (Física)",
+              topics: [
+                "[Química] Regra do Octeto, Ligação Iônica, Covalente (polar/apolar) e Forças Intermoleculares",
+                "[Física] Aceleração escalar média, MRUV e Torricelli (v² = v₀² + 2aΔS)",
+                "Queda livre e lançamento vertical no vácuo"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Ligações + MRUV"
+            },
+            {
+              id: "w2_d7",
+              dateStr: "08/12",
+              weekday: "Terça-feira",
+              subject: "sim",
+              title: "Mini Simulado Acumulativo 02 (35 Questões)",
+              topics: [
+                "14q Matemática + 11q Física + 10q Química (Semanas 1 + 2)",
+                "Cronometrar 105 minutos e catalogar lacunas no registro"
+              ],
+              qTarget: 35,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Conteúdo acumulado das Semanas 1 e 2"
+            }
+          ]
+        },
+        {
+          weekNum: 3,
+          period: "09/12 a 15/12",
+          theme: "Razão/Proporção/Porcentagem/Juros, Leis de Newton e Funções Inorgânicas",
+          simTarget: 45,
+          days: [
+            {
+              id: "w3_d1",
+              dateStr: "09/12",
+              weekday: "Quarta-feira",
+              subject: "math",
+              title: "Razão, Proporção, Escalas e Regra de Três Simples/Composta",
+              topics: [
+                "Razões especiais (velocidade, densidade demográfica, escala linear/área/volume)",
+                "Grandezas diretamente e inversamente proporcionais",
+                "Regra de três simples e composta sem decorar macetes falhos"
+              ],
+              qTarget: 35,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Pilar nº 1 do ENEM"
+            },
+            {
+              id: "w3_d2",
+              dateStr: "10/12",
+              weekday: "Quinta-feira",
+              subject: "phys",
+              title: "Leis de Newton e Principais Forças da Mecânica",
+              topics: [
+                "1ª Lei (Inércia), 2ª Lei (F_R = m·a) e 3ª Lei (Ação e Reação)",
+                "Força Peso, Normal, Tração em fios e roldanas",
+                "Força Elástica (Lei de Hooke) e Força de Atrito (Estático e Cinético)"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Dinâmica Básica"
+            },
+            {
+              id: "w3_d3",
+              dateStr: "11/12",
+              weekday: "Sexta-feira",
+              subject: "chem",
+              title: "Funções Inorgânicas: Ácidos, Bases, Sais e Óxidos",
+              topics: [
+                "Conceito de Arrhenius, ionização/dissociação, força e nomenclatura",
+                "Neutralização ácido-base e formação de sais",
+                "Óxidos ácidos e básicos (Chuva ácida, efeito estufa e aplicações)"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Química Inorgânica"
+            },
+            {
+              id: "w3_d4",
+              dateStr: "12/12",
+              weekday: "Sábado",
+              subject: "math",
+              title: "Porcentagem, Aumentos Sucessivos e Matemática Financeira",
+              topics: [
+                "Fatores de multiplicação (aumentos e descontos sucessivos)",
+                "Lucro sobre custo vs lucro sobre venda",
+                "Juros Simples e Juros Compostos (M = C·(1+i)ᵗ)"
+              ],
+              qTarget: 35,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Porcentagem e Financeira"
+            },
+            {
+              id: "w3_d5",
+              dateStr: "13/12",
+              weekday: "Domingo",
+              subject: "free",
+              title: "Dia Livre Flexível (Descanso & Recuperação)",
+              topics: [
+                "Descanso estratégico antes da reta final do intensivo de base"
+              ],
+              qTarget: 0,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Flexível conforme sua agenda da semana"
+            },
+            {
+              id: "w3_d6",
+              dateStr: "14/12",
+              weekday: "Segunda-feira",
+              subject: "chem",
+              title: "Reações Inorgânicas, Balanceamento + Plano Inclinado (Física)",
+              topics: [
+                "[Química] Síntese, decomposição, simples troca, dupla troca e balanceamento",
+                "[Física] Decomposição do Peso no Plano Inclinado e sistemas de blocos",
+                "Revisão rápida de fórmulas de Dinâmica"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Reações + Aplicações de Newton"
+            },
+            {
+              id: "w3_d7",
+              dateStr: "15/12",
+              weekday: "Terça-feira",
+              subject: "sim",
+              title: "Mini Simulado Acumulativo 03 (45 Questões)",
+              topics: [
+                "18q Matemática + 14q Física + 13q Química (Semanas 1 + 2 + 3)",
+                "Cronometrar 135 minutos (3 min/questão — ritmo real ENEM)"
+              ],
+              qTarget: 45,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Conteúdo acumulado das Semanas 1, 2 e 3"
+            }
+          ]
+        },
+        {
+          weekNum: 4,
+          period: "16/12 a 22/12",
+          theme: "Geometria Plana/Espacial & Funções, Energia/Hidrostática e Mol/Estequiometria",
+          simTarget: 60,
+          days: [
+            {
+              id: "w4_d1",
+              dateStr: "16/12",
+              weekday: "Quarta-feira",
+              subject: "math",
+              title: "Noções de Funções (1º e 2º Grau) e Leitura Gráfica",
+              topics: [
+                "Domínio, imagem, raízes e coeficiente angular/linear da Função Afim",
+                "Função Quadrática: concavidade, vértice (máximo e mínimo) e raízes",
+                "Interpretação de gráficos em problemas reais"
+              ],
+              qTarget: 35,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Base de Funções"
+            },
+            {
+              id: "w4_d2",
+              dateStr: "17/12",
+              weekday: "Quinta-feira",
+              subject: "phys",
+              title: "Trabalho, Potência, Energia Mecânica e Hidrostática Básica",
+              topics: [
+                "Trabalho de força constante, Potência média e Rendimento",
+                "Energia Cinética, Potencial Gravitacional/Elástica e Conservação de Energia",
+                "Hidrostática: Densidade, Pressão, Teorema de Stevin e Empuxo"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Energia e Hidrostática"
+            },
+            {
+              id: "w4_d3",
+              dateStr: "18/12",
+              weekday: "Sexta-feira",
+              subject: "chem",
+              title: "Grandezas Químicas: Massa Atômica, Massa Molecular, Mol e CNTP",
+              topics: [
+                "Unidade de massa atômica (u), Massa Molar (g/mol) e Constante de Avogadro",
+                "Cálculo de número de mols, massa, número de moléculas e volume molar (CNTP)",
+                "Introdução ao cálculo estequiométrico simples (proporção molar)"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Base de Estequiometria"
+            },
+            {
+              id: "w4_d4",
+              dateStr: "19/12",
+              weekday: "Sábado",
+              subject: "math",
+              title: "Geometria Plana e Espacial Básica (Áreas e Volumes Essenciais)",
+              topics: [
+                "Triângulos (Pitágoras, semelhança e áreas), quadriláteros e círculo",
+                "Sólidos geométricos básicos: Prismas, Cilindros, Pirâmides e Cones",
+                "Planificação e cálculo de volume em problemas do cotidiano"
+              ],
+              qTarget: 35,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Geometria de Base"
+            },
+            {
+              id: "w4_d5",
+              dateStr: "20/12",
+              weekday: "Domingo",
+              subject: "free",
+              title: "Dia Livre Flexível (Descanso & Recuperação)",
+              topics: [
+                "Descanso final antes do Simulado Geral de Encerramento das 4 Semanas"
+              ],
+              qTarget: 0,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Dia livre flexível da Semana 4"
+            },
+            {
+              id: "w4_d6",
+              dateStr: "21/12",
+              weekday: "Segunda-feira",
+              subject: "chem",
+              title: "Estequiometria Básica + Revisão Geral das 4 Semanas",
+              topics: [
+                "[Química] Estequiometria envolvendo massa, mol, volume e rendimento básico",
+                "[Revisão] Revisar caderno de erros dos Mini Simulados 01, 02 e 03",
+                "Consolidar mapa de fórmulas de Matemática, Física e Química"
+              ],
+              qTarget: 30,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Pedro Assaad (Telegram) • Consolidação de Base"
+            },
+            {
+              id: "w4_d7",
+              dateStr: "22/12",
+              weekday: "Terça-feira",
+              subject: "sim",
+              title: "Mini Simulado Acumulativo Final 04 (60 Questões)",
+              topics: [
+                "24q Matemática Básica + 18q Física Básica + 18q Química Básica",
+                "Avaliação completa das 4 semanas (180 min) • Meta: 80%+ de acertos"
+              ],
+              qTarget: 60,
+              qDone: 0,
+              qCorrect: 0,
+              checks: { aula: false, resumo: false, lista: false },
+              notes: "Encerramento oficial do Ciclo Base Exatas!"
+            }
+          ]
+        }
+      ];
+    }
+
+    // =======================================================================
+    // 2. ESTADO GLOBAL E PERSISTÊNCIA (LOCALSTORAGE)
+    // =======================================================================
+    const STORAGE_KEY = "base_exatas_eng_software_v2";
+
+    let state = {
+      selectedWeek: 0,
+      schedule: createDefaultSchedule(),
+      simulados: [],
+      focusMinutes: {
+        math: 0,
+        phys: 0,
+        chem: 0,
+        sim: 0
+      }
+    };
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.schedule) && parsed.schedule.length === 4) {
+            state = { ...state, ...parsed };
+          }
+        }
+      } catch (e) {
+        console.error("Erro ao ler localStorage:", e);
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.error("Erro ao salvar localStorage:", e);
+      }
+      renderDashboard();
+    }
+
+    // =======================================================================
+    // 3. UTILITÁRIOS DE UI & TOAST
+    // =======================================================================
+    const SUBJECT_META = {
+      math: {
+        label: "Matemática Básica",
+        short: "Matemática",
+        badge: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+        border: "border-sky-500/35",
+        dot: "bg-sky-400",
+        text: "text-sky-400"
+      },
+      phys: {
+        label: "Física Básica",
+        short: "Física",
+        badge: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+        border: "border-purple-500/35",
+        dot: "bg-purple-500",
+        text: "text-purple-400"
+      },
+      chem: {
+        label: "Química Básica",
+        short: "Química",
+        badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+        border: "border-emerald-500/35",
+        dot: "bg-emerald-500",
+        text: "text-emerald-400"
+      },
+      sim: {
+        label: "Mini Simulado",
+        short: "Simulado",
+        badge: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+        border: "border-amber-500/40",
+        dot: "bg-amber-400",
+        text: "text-amber-400"
+      },
+      free: {
+        label: "Dia Livre Flexível",
+        short: "Dia Livre",
+        badge: "bg-slate-700/60 text-slate-300 border-slate-600/50",
+        border: "border-slate-700/80",
+        dot: "bg-slate-400",
+        text: "text-slate-300"
+      }
+    };
+
+    function showToast(msg, tone = "info") {
+      const container = document.getElementById("toast-container");
+      const el = document.createElement("div");
+      const styleMap = {
+        info: "bg-card border-sky-500/40 text-slate-100",
+        success: "bg-card border-emerald-500/40 text-emerald-200",
+        warn: "bg-card border-amber-500/40 text-amber-200"
+      };
+      el.className = `${styleMap[tone] || styleMap.info} border px-4 py-3 rounded-xl shadow-2xl text-xs sm:text-sm font-medium flex items-center gap-2 transition-all duration-300 translate-y-2 opacity-0`;
+      el.innerHTML = `<span class="w-2 h-2 rounded-full ${tone === 'success' ? 'bg-emerald-400' : tone === 'warn' ? 'bg-amber-400' : 'bg-sky-400'}"></span><span>${msg}</span>`;
+      container.appendChild(el);
+      requestAnimationFrame(() => el.classList.remove("translate-y-2", "opacity-0"));
+      setTimeout(() => {
+        el.classList.add("opacity-0", "translate-y-2");
+        setTimeout(() => el.remove(), 300);
+      }, 3000);
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.add("hidden"));
+      document.getElementById(`tab-${tabName}`).classList.remove("hidden");
+
+      document.querySelectorAll(".nav-btn").forEach(btn => {
+        btn.classList.remove("tab-btn-active", "text-white");
+        btn.classList.add("text-slate-400");
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add("tab-btn-active", "text-white");
+          btn.classList.remove("text-slate-400");
+        }
+      });
+
+      if (tabName === "simulados") {
+        renderSimuladosChart();
+      }
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById("modal-overlay");
+      overlay.classList.add("hidden");
+      overlay.classList.remove("flex");
+    }
+
+    // =======================================================================
+    // 4. RENDERIZAÇÃO DO DASHBOARD ESTRATÉGICO
+    // =======================================================================
+    function renderDashboard() {
+      let totalStudyDays = 0;
+      let completedStudyDays = 0;
+      let totalTopics = 0;
+      let completedTopics = 0;
+      let totalQTarget = 0;
+      let totalQDone = 0;
+      let totalQCorrect = 0;
+
+      const subStats = {
+        math: { aulasTotal: 0, aulasDone: 0, qDone: 0 },
+        phys: { aulasTotal: 0, aulasDone: 0, qDone: 0 },
+        chem: { aulasTotal: 0, aulasDone: 0, qDone: 0 }
+      };
+
+      let nextPendingDay = null;
+      let nextPendingWeekNum = 1;
+
+      state.schedule.forEach(week => {
+        week.days.forEach(day => {
+          if (day.subject === "free") return;
+
+          totalStudyDays++;
+          const isDayComplete = day.subject === "sim"
+            ? (day.checks.lista || day.qDone > 0)
+            : (day.checks.aula && day.checks.lista);
+
+          if (isDayComplete) {
+            completedStudyDays++;
+          } else if (!nextPendingDay) {
+            nextPendingDay = day;
+            nextPendingWeekNum = week.weekNum;
+          }
+
+          const topicsCount = Array.isArray(day.topics) ? day.topics.length : 0;
+          totalTopics += topicsCount;
+          if (isDayComplete) {
+            completedTopics += topicsCount;
+          } else if (day.checks.aula || day.checks.resumo) {
+            completedTopics += Math.ceil(topicsCount / 2);
+          }
+
+          totalQTarget += (parseInt(day.qTarget) || 0);
+          totalQDone += (parseInt(day.qDone) || 0);
+          totalQCorrect += (parseInt(day.qCorrect) || 0);
+
+          if (subStats[day.subject]) {
+            subStats[day.subject].aulasTotal++;
+            if (day.checks.aula) subStats[day.subject].aulasDone++;
+            subStats[day.subject].qDone += (parseInt(day.qDone) || 0);
+          }
+        });
+      });
+
+      // Somar também questões dos Mini Simulados registrados
+      state.simulados.forEach(sim => {
+        const tot = parseInt(sim.totalQ) || 0;
+        const m = parseInt(sim.acMath) || 0;
+        const p = parseInt(sim.acPhys) || 0;
+        const c = parseInt(sim.acChem) || 0;
+        totalQDone += tot;
+        totalQCorrect += (m + p + c);
+        subStats.math.qDone += m;
+        subStats.phys.qDone += p;
+        subStats.chem.qDone += c;
+      });
+
+      // KPIs Principais
+      const overallPct = totalStudyDays > 0 ? Math.round((completedStudyDays / totalStudyDays) * 100) : 0;
+      document.getElementById("kpi-overall-pct").textContent = `${overallPct}%`;
+      document.getElementById("kpi-days-done").textContent = `${completedStudyDays}/${totalStudyDays} dias de estudo`;
+      document.getElementById("kpi-overall-bar").style.width = `${overallPct}%`;
+
+      document.getElementById("kpi-topics-done").textContent = completedTopics;
+      document.getElementById("kpi-topics-total").textContent = `/ ${totalTopics} tópicos`;
+
+      const accPct = totalQDone > 0 ? Math.round((totalQCorrect / totalQDone) * 100) : 0;
+      document.getElementById("kpi-questions-done").textContent = totalQDone;
+      document.getElementById("kpi-questions-acc").textContent = `(${accPct}% acerto)`;
+      document.getElementById("kpi-questions-target").textContent = `Meta do cronograma: ${totalQTarget} questões`;
+
+      // Média Mini Simulados
+      if (state.simulados.length > 0) {
+        const avgPct = Math.round(
+          state.simulados.reduce((acc, s) => {
+            const ac = (s.acMath || 0) + (s.acPhys || 0) + (s.acChem || 0);
+            return acc + (s.totalQ > 0 ? (ac / s.totalQ) * 100 : 0);
+          }, 0) / state.simulados.length
+        );
+        document.getElementById("kpi-sim-avg").textContent = `${avgPct}%`;
+      } else {
+        document.getElementById("kpi-sim-avg").textContent = "--%";
+      }
+      document.getElementById("kpi-sim-count").textContent = `${state.simulados.length}/4 realizados`;
+
+      // Barras por Disciplina
+      ["math", "phys", "chem"].forEach(sub => {
+        const info = subStats[sub];
+        const pct = info.aulasTotal > 0 ? Math.round((info.aulasDone / info.aulasTotal) * 100) : 0;
+        document.getElementById(`sub-${sub}-aulas`).textContent = `${info.aulasDone}/${info.aulasTotal} aulas`;
+        document.getElementById(`sub-${sub}-qs`).textContent = `${info.qDone} questões`;
+        document.getElementById(`sub-${sub}-bar`).style.width = `${pct}%`;
+      });
+
+      // Tempo Líquido Focado
+      const fm = state.focusMinutes;
+      const totalMins = (fm.math || 0) + (fm.phys || 0) + (fm.chem || 0) + (fm.sim || 0);
+      const hrs = Math.floor(totalMins / 60);
+      const mins = totalMins % 60;
+      document.getElementById("kpi-focus-hours").textContent = `${hrs}h ${String(mins).padStart(2, "0")}m`;
+      document.getElementById("kpi-focus-breakdown").textContent =
+        `Mat: ${fm.math || 0}m • Fís: ${fm.phys || 0}m • Quím: ${fm.chem || 0}m`;
+
+      // Próxima Missão
+      const nextBox = document.getElementById("next-mission-box");
+      if (nextPendingDay) {
+        const meta = SUBJECT_META[nextPendingDay.subject] || SUBJECT_META.math;
+        nextBox.innerHTML = `
+          <div class="flex items-center gap-2 text-xs font-mono text-slate-400">
+            <span>Semana ${nextPendingWeekNum}</span>
+            <span>•</span>
+            <span>${nextPendingDay.weekday} (${nextPendingDay.dateStr})</span>
+          </div>
+          <div class="inline-block px-2.5 py-0.5 rounded-md text-xs font-bold border ${meta.badge}">
+            ${meta.label}
+          </div>
+          <h4 class="font-bold text-sm sm:text-base text-white leading-snug">${nextPendingDay.title}</h4>
+          <ul class="space-y-1 text-xs text-slate-300 pt-1">
+            ${nextPendingDay.topics.slice(0, 3).map(t => `<li class="flex items-start gap-1.5"><span class="text-sky-400">•</span><span>${t}</span></li>`).join("")}
+          </ul>
+          <div class="pt-2 text-xs font-mono text-slate-400">
+            Meta de prática: <strong class="text-white">${nextPendingDay.qTarget} questões</strong>
+          </div>
+        `;
+      } else {
+        nextBox.innerHTML = `
+          <h4 class="font-bold text-base text-emerald-400">🎉 Todas as metas das 4 semanas foram concluídas!</h4>
+          <p class="text-xs text-slate-300">Você construiu uma base sólida em Matemática, Física e Química para Engenharia de Software.</p>
+        `;
+      }
+    }
+
+    // =======================================================================
+    // 5. CRONOGRAMA SEMANAL EDITÁVEL & DIA LIVRE FLEXÍVEL
+    // =======================================================================
+    function selectWeek(idx) {
+      state.selectedWeek = idx;
+      saveState();
+      renderSchedule();
+    }
+
+    function setFlexibleFreeDay(weekIdx, targetDayIdx) {
+      const week = state.schedule[weekIdx];
+      const currentFreeIdx = week.days.findIndex(d => d.subject === "free");
+      const targetDay = week.days[targetDayIdx];
+
+      if (targetDay.subject === "free") {
+        showToast("Este dia já está definido como seu Dia Livre!", "info");
+        return;
+      }
+
+      if (currentFreeIdx !== -1) {
+        const oldFreeDay = week.days[currentFreeIdx];
+
+        // Troca os conteúdos entre o dia alvo e o antigo dia livre, mantendo datas e dias da semana fixos
+        const tempContent = {
+          subject: targetDay.subject,
+          title: targetDay.title,
+          topics: [...targetDay.topics],
+          qTarget: targetDay.qTarget,
+          qDone: targetDay.qDone,
+          qCorrect: targetDay.qCorrect,
+          checks: { ...targetDay.checks },
+          notes: targetDay.notes
+        };
+
+        targetDay.subject = "free";
+        targetDay.title = "Dia Livre Flexível (Descanso & Recuperação)";
+        targetDay.topics = ["Dia reservado para descanso mental ou reposição leve opcional"];
+        targetDay.qTarget = 0;
+        targetDay.qDone = 0;
+        targetDay.qCorrect = 0;
+        targetDay.checks = { aula: false, resumo: false, lista: false };
+        targetDay.notes = "Dia livre escolhido por você nesta semana";
+
+        oldFreeDay.subject = tempContent.subject;
+        oldFreeDay.title = tempContent.title;
+        oldFreeDay.topics = tempContent.topics;
+        oldFreeDay.qTarget = tempContent.qTarget;
+        oldFreeDay.qDone = tempContent.qDone;
+        oldFreeDay.qCorrect = tempContent.qCorrect;
+        oldFreeDay.checks = tempContent.checks;
+        oldFreeDay.notes = tempContent.notes;
+
+        saveState();
+        renderSchedule();
+        showToast(`Dia Livre movido para ${targetDay.weekday} (${targetDay.dateStr})!`, "success");
+      }
+    }
+
+    function toggleDayCheck(weekIdx, dayIdx, field) {
+      const day = state.schedule[weekIdx].days[dayIdx];
+      day.checks[field] = !day.checks[field];
+      saveState();
+      renderSchedule();
+    }
+
+    function updateDayQuestions(weekIdx, dayIdx, field, value) {
+      const day = state.schedule[weekIdx].days[dayIdx];
+      const val = Math.max(0, parseInt(value) || 0);
+      day[field] = val;
+      if (field === "qDone" && val > 0 && !day.checks.lista) {
+        day.checks.lista = true;
+      }
+      saveState();
+      renderSchedule();
+    }
+
+    function renderSchedule() {
+      const week = state.schedule[state.selectedWeek];
+
+      // Atualizar botões das semanas
+      document.querySelectorAll(".week-tab-btn").forEach((btn, idx) => {
+        if (idx === state.selectedWeek) {
+          btn.className = "week-tab-btn p-3 rounded-xl border border-sky-400 bg-sky-500/15 text-left transition";
+        } else {
+          btn.className = "week-tab-btn p-3 rounded-xl border border-borderSubtle bg-obsidian/60 hover:border-slate-600 text-left transition";
+        }
+      });
+
+      document.getElementById("week-badge").textContent = `SEMANA ${week.weekNum} DE 4`;
+      document.getElementById("week-sim-info").textContent = `Meta Mini Simulado: ${week.simTarget} questões`;
+      document.getElementById("week-heading").textContent = `${week.period} • ${week.theme}`;
+
+      const studyDays = week.days.filter(d => d.subject !== "free");
+      const doneDays = studyDays.filter(d => d.subject === "sim" ? (d.checks.lista || d.qDone > 0) : (d.checks.aula && d.checks.lista)).length;
+      document.getElementById("week-progress-label").textContent = `${doneDays}/${studyDays.length} dias concluídos`;
+
+      const grid = document.getElementById("days-grid");
+      grid.innerHTML = week.days.map((day, dIdx) => {
+        const meta = SUBJECT_META[day.subject] || SUBJECT_META.math;
+        const isFree = day.subject === "free";
+        const isSim = day.subject === "sim";
+        const isDone = !isFree && (isSim ? (day.checks.lista || day.qDone > 0) : (day.checks.aula && day.checks.lista));
+
+        return `
+          <div class="bg-card border ${isDone ? 'border-emerald-500/60' : meta.border} rounded-2xl p-5 flex flex-col justify-between transition shadow-sm">
+            <div>
+              <!-- Cabeçalho do Dia -->
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-mono text-xs font-bold text-slate-400">${day.dateStr}</span>
+                    <span class="text-xs text-slate-600">•</span>
+                    <span class="font-bold text-sm text-white">${day.weekday}</span>
+                    ${isDone ? '<span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">OK</span>' : ''}
+                  </div>
+                  <span class="inline-block mt-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${meta.badge}">
+                    ${meta.label}
+                  </span>
+                </div>
+
+                <!-- Botões Editar e Definir Dia Livre -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                  ${!isFree ? `
+                    <button onclick="setFlexibleFreeDay(${state.selectedWeek}, ${dIdx})" class="px-2 py-1 rounded-lg bg-obsidian hover:bg-slate-800 border border-borderSubtle text-[10px] font-mono text-slate-300 hover:text-emerald-400 transition" title="Tornar este dia o meu Dia Livre da semana">
+                      Definir Dia Livre
+                    </button>
+                  ` : ''}
+                  <button onclick="openEditDayModal(${state.selectedWeek}, ${dIdx})" class="px-2.5 py-1 rounded-lg bg-obsidian hover:bg-slate-800 border border-borderSubtle text-[11px] font-semibold text-sky-400 transition">
+                    Editar Dia
+                  </button>
+                </div>
+              </div>
+
+              <!-- Título do Dia -->
+              <h3 class="font-bold text-sm sm:text-[15px] text-slate-100 leading-snug mb-3">
+                ${day.title}
+              </h3>
+
+              <!-- Lista de Tópicos -->
+              <ul class="space-y-1.5 mb-4">
+                ${day.topics.map(t => `
+                  <li class="text-xs text-slate-300 flex items-start gap-2 leading-relaxed">
+                    <span class="${meta.text} font-bold mt-0.5">•</span>
+                    <span>${t}</span>
+                  </li>
+                `).join("")}
+              </ul>
+            </div>
+
+            <!-- Rodapé Interativo do Card -->
+            <div class="pt-3 border-t border-borderSubtle/80 space-y-3">
+              ${!isFree ? `
+                <!-- Checkboxes de Etapas -->
+                <div class="flex flex-wrap items-center gap-2 text-xs">
+                  ${!isSim ? `
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-obsidian border border-borderSubtle cursor-pointer select-none">
+                      <input type="checkbox" ${day.checks.aula ? "checked" : ""} onchange="toggleDayCheck(${state.selectedWeek}, ${dIdx}, 'aula')" class="accent-sky-400 rounded" />
+                      <span>Aula Assaad</span>
+                    </label>
+                    <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-obsidian border border-borderSubtle cursor-pointer select-none">
+                      <input type="checkbox" ${day.checks.resumo ? "checked" : ""} onchange="toggleDayCheck(${state.selectedWeek}, ${dIdx}, 'resumo')" class="accent-purple-500 rounded" />
+                      <span>Resumo</span>
+                    </label>
+                  ` : ''}
+                  <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-obsidian border border-borderSubtle cursor-pointer select-none">
+                    <input type="checkbox" ${day.checks.lista ? "checked" : ""} onchange="toggleDayCheck(${state.selectedWeek}, ${dIdx}, 'lista')" class="accent-emerald-500 rounded" />
+                    <span>${isSim ? 'Simulado Feito' : 'Lista'}</span>
+                  </label>
+                </div>
+
+                <!-- Controle Rápido de Questões -->
+                <div class="flex items-center justify-between gap-2 bg-obsidian/90 px-3 py-2 rounded-xl border border-borderSubtle text-xs font-mono">
+                  <span class="text-slate-400">Meta: <strong class="text-white">${day.qTarget}q</strong></span>
+                  <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-1 text-slate-300">
+                      Feitas:
+                      <input type="number" min="0" max="200" value="${day.qDone}" onchange="updateDayQuestions(${state.selectedWeek}, ${dIdx}, 'qDone', this.value)" class="w-12 px-1 py-0.5 rounded bg-card border border-borderSubtle text-center text-sky-400 font-bold" />
+                    </label>
+                    <label class="flex items-center gap-1 text-slate-300">
+                      Acertos:
+                      <input type="number" min="0" max="200" value="${day.qCorrect}" onchange="updateDayQuestions(${state.selectedWeek}, ${dIdx}, 'qCorrect', this.value)" class="w-12 px-1 py-0.5 rounded bg-card border border-borderSubtle text-center text-emerald-400 font-bold" />
+                    </label>
+                  </div>
+                </div>
+              ` : `
+                <div class="p-2.5 rounded-xl bg-obsidian/60 border border-borderSubtle text-xs text-slate-400 text-center">
+                  🌿 Dia livre ativo nesta semana.
+                </div>
+              `}
+
+              <!-- Anotação / Módulo Telegram -->
+              ${day.notes ? `
+                <p class="text-[11px] font-mono text-slate-400 truncate" title="${day.notes}">
+                  📌 ${day.notes}
+                </p>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // =======================================================================
+    // 6. MODAL DE EDIÇÃO COMPLETA DE UM DIA DO CRONOGRAMA
+    // =======================================================================
+    function openEditDayModal(weekIdx, dayIdx) {
+      const day = state.schedule[weekIdx].days[dayIdx];
+      document.getElementById("modal-title").textContent = `Editar ${day.weekday} (${day.dateStr})`;
+
+      const body = document.getElementById("modal-body");
+      body.innerHTML = `
+        <div class="space-y-3.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Disciplina / Tipo do Dia</label>
+              <select id="edit-day-subject" class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm">
+                <option value="math" ${day.subject === 'math' ? 'selected' : ''}>Matemática Básica</option>
+                <option value="phys" ${day.subject === 'phys' ? 'selected' : ''}>Física Básica</option>
+                <option value="chem" ${day.subject === 'chem' ? 'selected' : ''}>Química Básica</option>
+                <option value="sim" ${day.subject === 'sim' ? 'selected' : ''}>Mini Simulado Acumulativo</option>
+                <option value="free" ${day.subject === 'free' ? 'selected' : ''}>Dia Livre Flexível</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Meta de Questões</label>
+              <input type="number" id="edit-day-qtarget" min="0" max="200" value="${day.qTarget}" class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm font-mono" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Título Principal do Dia</label>
+            <input type="text" id="edit-day-title" value="${day.title.replace(/"/g, '&quot;')}" class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Tópicos de Estudo (1 tópico por linha)</label>
+            <textarea id="edit-day-topics" rows="4" class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-xs sm:text-sm leading-relaxed">${day.topics.join("\n")}</textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1">Anotações / Módulo no Telegram do Pedro Assaad</label>
+            <input type="text" id="edit-day-notes" value="${(day.notes || '').replace(/"/g, '&quot;')}" placeholder="Ex: Módulo 03 - Aulas 1 a 4 no Telegram" class="w-full px-3 py-2 rounded-xl bg-obsidian border border-borderSubtle text-sm" />
+          </div>
+        </div>
+      `;
+
+      const footer = document.getElementById("modal-footer");
+      footer.innerHTML = `
+        <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold transition">Cancelar</button>
+        <button onclick="saveEditedDay(${weekIdx}, ${dayIdx})" class="px-5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-obsidian text-xs font-bold transition">Salvar Alterações</button>
+      `;
+
+      const overlay = document.getElementById("modal-overlay");
+      overlay.classList.remove("hidden");
+      overlay.classList.add("flex");
+    }
+
+    function saveEditedDay(weekIdx, dayIdx) {
+      const day = state.schedule[weekIdx].days[dayIdx];
+      day.subject = document.getElementById("edit-day-subject").value;
+      day.qTarget = Math.max(0, parseInt(document.getElementById("edit-day-qtarget").value) || 0);
+      day.title = document.getElementById("edit-day-title").value.trim() || "Sessão de Estudo";
+      const rawTopics = document.getElementById("edit-day-topics").value
+        .split("\n")
+        .map(line => line.trim())
+        .filter(Boolean);
+      day.topics = rawTopics.length > 0 ? rawTopics : ["Estudo focado e resolução de exercícios"];
+      day.notes = document.getElementById("edit-day-notes").value.trim();
+
+      saveState();
+      renderSchedule();
+      closeModal();
+      showToast("Dia atualizado com sucesso!", "success");
+    }
+
+    function confirmResetSchedule() {
+      document.getElementById("modal-title").textContent = "Restaurar Cronograma Padrão?";
+      document.getElementById("modal-body").innerHTML = `
+        <p class="text-slate-300">Isso irá restaurar os títulos, tópicos e metas originais das 4 semanas (25/11 a 22/12/2026). Seus simulados e tempo de foco serão mantidos.</p>
+      `;
+      document.getElementById("modal-footer").innerHTML = `
+        <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold transition">Cancelar</button>
+        <button onclick="executeResetSchedule()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition">Sim, Restaurar</button>
+      `;
+      const overlay = document.getElementById("modal-overlay");
+      overlay.classList.remove("hidden");
+      overlay.classList.add("flex");
+    }
+
+    function executeResetSchedule() {
+      state.schedule = createDefaultSchedule();
+      saveState();
+      renderSchedule();
+      closeModal();
+      showToast("Cronograma padrão restaurado!", "info");
+    }
+
+    // =======================================================================
+    // 7. REGISTRO E GRÁFICO DOS MINI SIMULADOS ACUMULATIVOS
+    // =======================================================================
+    function autoFillSimQuestions() {
+      const val = document.getElementById("sim-week").value;
+      const input = document.getElementById("sim-total-q");
+      if (val.includes("25q")) input.value = 25;
+      else if (val.includes("35q")) input.value = 35;
+      else if (val.includes("45q")) input.value = 45;
+      else if (val.includes("60q")) input.value = 60;
+    }
+
+    function saveSimulado(e) {
+      e.preventDefault();
+      const editId = document.getElementById("sim-edit-id").value;
+      const weekLabel = document.getElementById("sim-week").value;
+      const date = document.getElementById("sim-date").value;
+      const totalQ = Math.max(1, parseInt(document.getElementById("sim-total-q").value) || 25);
+      const timeMin = Math.max(1, parseInt(document.getElementById("sim-time").value) || 60);
+      const acMath = Math.max(0, parseInt(document.getElementById("sim-ac-math").value) || 0);
+      const acPhys = Math.max(0, parseInt(document.getElementById("sim-ac-phys").value) || 0);
+      const acChem = Math.max(0, parseInt(document.getElementById("sim-ac-chem").value) || 0);
+      const gaps = document.getElementById("sim-gaps").value.trim();
+
+      const totalCorrect = acMath + acPhys + acChem;
+      if (totalCorrect > totalQ) {
+        showToast("A soma dos acertos não pode ser maior que o total de questões!", "warn");
+        return;
+      }
+
+      const record = {
+        id: editId ? parseInt(editId) : Date.now(),
+        weekLabel,
+        date,
+        totalQ,
+        timeMin,
+        acMath,
+        acPhys,
+        acChem,
+        gaps
+      };
+
+      if (editId) {
+        const idx = state.simulados.findIndex(s => s.id === parseInt(editId));
+        if (idx !== -1) state.simulados[idx] = record;
+        cancelEditSimulado();
+        showToast("Mini simulado atualizado!", "success");
+      } else {
+        state.simulados.push(record);
+        showToast("Mini simulado registrado!", "success");
+      }
+
+      state.simulados.sort((a, b) => new Date(a.date) - new Date(b.date));
+      saveState();
+      renderSimulados();
+      e.target.reset();
+      document.getElementById("sim-date").value = new Date().toISOString().split("T")[0];
+      autoFillSimQuestions();
+    }
+
+    function editSimulado(id) {
+      const sim = state.simulados.find(s => s.id === id);
+      if (!sim) return;
+
+      document.getElementById("sim-edit-id").value = sim.id;
+      document.getElementById("sim-week").value = sim.weekLabel;
+      document.getElementById("sim-date").value = sim.date;
+      document.getElementById("sim-total-q").value = sim.totalQ;
+      document.getElementById("sim-time").value = sim.timeMin;
+      document.getElementById("sim-ac-math").value = sim.acMath;
+      document.getElementById("sim-ac-phys").value = sim.acPhys;
+      document.getElementById("sim-ac-chem").value = sim.acChem;
+      document.getElementById("sim-gaps").value = sim.gaps || "";
+
+      document.getElementById("sim-form-title").textContent = "Editando Mini Simulado";
+      document.getElementById("sim-submit-btn").textContent = "Atualizar Registro";
+      document.getElementById("sim-cancel-edit").classList.remove("hidden");
+    }
+
+    function cancelEditSimulado() {
+      document.getElementById("sim-edit-id").value = "";
+      document.getElementById("sim-form").reset();
+      document.getElementById("sim-date").value = new Date().toISOString().split("T")[0];
+      autoFillSimQuestions();
+      document.getElementById("sim-form-title").textContent = "Registrar Mini Simulado";
+      document.getElementById("sim-submit-btn").textContent = "Salvar Mini Simulado";
+      document.getElementById("sim-cancel-edit").classList.add("hidden");
+    }
+
+    function deleteSimulado(id) {
+      state.simulados = state.simulados.filter(s => s.id !== id);
+      saveState();
+      renderSimulados();
+      showToast("Registro removido.", "info");
+    }
+
+    function renderSimulados() {
+      const list = document.getElementById("sim-history-list");
+
+      // Totais por matéria nos simulados
+      let sumMath = 0, sumPhys = 0, sumChem = 0;
+      state.simulados.forEach(s => {
+        sumMath += s.acMath || 0;
+        sumPhys += s.acPhys || 0;
+        sumChem += s.acChem || 0;
+      });
+      document.getElementById("avg-sim-math").textContent = sumMath;
+      document.getElementById("avg-sim-phys").textContent = sumPhys;
+      document.getElementById("avg-sim-chem").textContent = sumChem;
+
+      if (state.simulados.length === 0) {
+        list.innerHTML = `
+          <div class="p-6 rounded-xl bg-obsidian/60 border border-borderSubtle text-center text-xs text-slate-400">
+            Nenhum Mini Simulado Acumulativo registrado ainda.<br/>
+            Ao concluir o dia de simulado da Semana 1 (01/12), lance seu desempenho ao lado!
+          </div>
+        `;
+      } else {
+        list.innerHTML = [...state.simulados].reverse().map(s => {
+          const totalCorrect = s.acMath + s.acPhys + s.acChem;
+          const pct = Math.round((totalCorrect / s.totalQ) * 100);
+          return `
+            <div class="p-4 rounded-xl bg-obsidian/80 border border-borderSubtle flex flex-col gap-2">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-mono text-xs font-bold">${s.weekLabel}</span>
+                  <span class="text-xs font-mono text-slate-400">${s.date}</span>
+                  <span class="text-xs font-mono text-slate-400">• ${s.timeMin} min</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <span class="font-mono text-sm font-extrabold ${pct >= 80 ? 'text-emerald-400' : pct >= 60 ? 'text-amber-400' : 'text-rose-400'}">
+                    ${totalCorrect}/${s.totalQ} (${pct}%)
+                  </span>
+                  <button onclick="editSimulado(${s.id})" class="text-xs text-sky-400 hover:underline">Editar</button>
+                  <button onclick="deleteSimulado(${s.id})" class="text-xs text-rose-400 hover:underline">Excluir</button>
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-3 text-xs font-mono">
+                <span class="text-sky-400">Mat: <strong>${s.acMath}</strong></span>
+                <span class="text-purple-400">Fís: <strong>${s.acPhys}</strong></span>
+                <span class="text-emerald-400">Quím: <strong>${s.acChem}</strong></span>
+              </div>
+
+              ${s.gaps ? `
+                <p class="text-xs text-slate-300 bg-card/80 px-3 py-2 rounded-lg border border-borderSubtle/70">
+                  <strong class="text-amber-400">Lacunas:</strong> ${s.gaps}
+                </p>
+              ` : ''}
+            </div>
+          `;
+        }).join("");
+      }
+
+      renderSimuladosChart();
+    }
+
+    function renderSimuladosChart() {
+      const canvas = document.getElementById("sim-chart-canvas");
+      if (!canvas) return;
+
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+
+      const W = rect.width;
+      const H = rect.height;
+      ctx.clearRect(0, 0, W, H);
+
+      const padLeft = 38;
+      const padRight = 20;
+      const padTop = 20;
+      const padBottom = 30;
+      const chartW = W - padLeft - padRight;
+      const chartH = H - padTop - padBottom;
+
+      // Linhas de grade horizontais (0%, 25%, 50%, 75%, 100%)
+      ctx.font = "10px 'JetBrains Mono', monospace";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+
+      [0, 25, 50, 75, 100].forEach(val => {
+        const y = padTop + chartH - (val / 100) * chartH;
+        ctx.strokeStyle = val === 80 ? "rgba(16, 185, 129, 0.25)" : "rgba(148, 163, 184, 0.12)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(padLeft, y);
+        ctx.lineTo(W - padRight, y);
+        ctx.stroke();
+
+        ctx.fillStyle = "#64748b";
+        ctx.fillText(`${val}%`, padLeft - 6, y);
+      });
+
+      // Linha meta 80%
+      const y80 = padTop + chartH - 0.8 * chartH;
+      ctx.strokeStyle = "rgba(16, 185, 129, 0.45)";
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(padLeft, y80);
+      ctx.lineTo(W - padRight, y80);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      if (state.simulados.length === 0) {
+        ctx.fillStyle = "#64748b";
+        ctx.textAlign = "center";
+        ctx.font = "12px 'Inter', sans-serif";
+        ctx.fillText("Registre seu 1º Mini Simulado para visualizar a curva de evolução", W / 2, H / 2);
+        return;
+      }
+
+      const points = state.simulados.map((s, i) => {
+        const totalCorrect = s.acMath + s.acPhys + s.acChem;
+        const pct = s.totalQ > 0 ? Math.min(100, (totalCorrect / s.totalQ) * 100) : 0;
+        const x = state.simulados.length === 1
+          ? padLeft + chartW / 2
+          : padLeft + (i / (state.simulados.length - 1)) * chartW;
+        const y = padTop + chartH - (pct / 100) * chartH;
+        return { x, y, pct: Math.round(pct), label: s.weekLabel.split(" ")[0] + " " + (s.weekLabel.split(" ")[1] || "") };
+      });
+
+      // Área preenchida sob a curva
+      if (points.length > 1) {
+        const grad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+        grad.addColorStop(0, "rgba(245, 158, 11, 0.30)");
+        grad.addColorStop(1, "rgba(245, 158, 11, 0.0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, padTop + chartH);
+        points.forEach(p => ctx.lineTo(p.x, p.y));
+        ctx.lineTo(points[points.length - 1].x, padTop + chartH);
+        ctx.closePath();
+        ctx.fill();
+
+        // Linha principal
+        ctx.strokeStyle = "#f59e0b";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        points.forEach((p, idx) => {
+          if (idx === 0) ctx.moveTo(p.x, p.y);
+          else ctx.lineTo(p.x, p.y);
+        });
+        ctx.stroke();
+      }
+
+      // Pontos e Rótulos
+      points.forEach(p => {
+        ctx.fillStyle = "#0b0f19";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#f59e0b";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#f8fafc";
+        ctx.textAlign = "center";
+        ctx.font = "bold 11px 'JetBrains Mono', monospace";
+        ctx.fillText(`${p.pct}%`, p.x, p.y - 12);
+
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "10px 'JetBrains Mono', monospace";
+        ctx.fillText(p.label, p.x, H - 10);
+      });
+    }
+
+    // =======================================================================
+    // 8. TIMER DE FOCO CUSTOMIZÁVEL (WEB AUDIO API + SINCRONIA TOPO)
+    // =======================================================================
+    let timerConfig = {
+      subject: "math",
+      focusMinutes: 45,
+      breakMinutes: 10,
+      phase: "focus", // 'focus' ou 'break'
+      remainingSeconds: 45 * 60,
+      isRunning: false,
+      intervalId: null
+    };
+
+    function setTimerSubject(sub) {
+      timerConfig.subject = sub;
+      document.querySelectorAll(".tsub-btn").forEach(btn => {
+        if (btn.dataset.tsub === sub) {
+          btn.className = "tsub-btn p-2.5 rounded-xl border border-sky-400 bg-sky-500/15 text-white text-xs font-bold transition flex items-center justify-center gap-1.5";
+        } else {
+          btn.className = "tsub-btn p-2.5 rounded-xl border border-borderSubtle bg-obsidian text-slate-400 hover:text-white text-xs font-bold transition flex items-center justify-center gap-1.5";
+        }
+      });
+
+      const dotMap = {
+        math: "bg-sky-400",
+        phys: "bg-purple-500",
+        chem: "bg-emerald-500",
+        sim: "bg-amber-400"
+      };
+      document.getElementById("mini-timer-subject-dot").className = `w-2.5 h-2.5 rounded-full ${dotMap[sub]}`;
+      updateTimerUI();
+    }
+
+    function applyFocusPreset(mins) {
+      updateCustomFocus(mins);
+    }
+
+    function updateCustomFocus(val) {
+      const clamped = Math.max(1, Math.min(180, parseInt(val) || 45));
+      timerConfig.focusMinutes = clamped;
+      document.getElementById("custom-focus-input").value = clamped;
+      document.getElementById("custom-focus-slider").value = clamped;
+      if (timerConfig.phase === "focus" && !timerConfig.isRunning) {
+        timerConfig.remainingSeconds = clamped * 60;
+        updateTimerUI();
+      }
+    }
+
+    function updateCustomBreak(val) {
+      const clamped = Math.max(5, Math.min(30, parseInt(val) || 10));
+      timerConfig.breakMinutes = clamped;
+      document.getElementById("custom-break-input").value = clamped;
+      document.getElementById("custom-break-slider").value = clamped;
+      if (timerConfig.phase === "break" && !timerConfig.isRunning) {
+        timerConfig.remainingSeconds = clamped * 60;
+        updateTimerUI();
+      }
+    }
+
+    function formatTimeMMSS(totalSec) {
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+
+    function updateTimerUI() {
+      const formatted = formatTimeMMSS(timerConfig.remainingSeconds);
+      document.getElementById("main-timer-display").textContent = formatted;
+      document.getElementById("mini-timer-display").textContent = formatted;
+
+      const subName = SUBJECT_META[timerConfig.subject].label.toUpperCase();
+      const phaseBadge = document.getElementById("timer-phase-badge");
+      if (timerConfig.phase === "focus") {
+        phaseBadge.textContent = `MODO FOCO • ${subName}`;
+        phaseBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-sky-500/15 text-sky-400";
+      } else {
+        phaseBadge.textContent = `PAUSA DE RECUPERAÇÃO (${timerConfig.breakMinutes} MIN)`;
+        phaseBadge.className = "px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/15 text-emerald-400";
+      }
+
+      const totalPhaseSec = (timerConfig.phase === "focus" ? timerConfig.focusMinutes : timerConfig.breakMinutes) * 60;
+      const pct = totalPhaseSec > 0 ? Math.max(0, (timerConfig.remainingSeconds / totalPhaseSec) * 100) : 0;
+      document.getElementById("timer-progress-bg").style.width = `${pct}%`;
+
+      document.getElementById("main-timer-btn").textContent = timerConfig.isRunning ? "Pausar" : "Iniciar Foco";
+      document.getElementById("mini-icon-play").classList.toggle("hidden", timerConfig.isRunning);
+      document.getElementById("mini-icon-pause").classList.toggle("hidden", !timerConfig.isRunning);
+    }
+
+    function playBeepWebAudio() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const notes = [523.25, 659.25, 783.99]; // Dó, Mi, Sol
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.16);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.16 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.16);
+          osc.stop(ctx.currentTime + idx * 0.16 + 0.36);
+        });
+      } catch (e) {
+        console.warn("Web Audio não disponível:", e);
+      }
+    }
+
+    function toggleTimer() {
+      if (timerConfig.isRunning) {
+        pauseTimer();
+      } else {
+        startTimer();
+      }
+    }
+
+    function startTimer() {
+      if (timerConfig.isRunning) return;
+      timerConfig.isRunning = true;
+      updateTimerUI();
+
+      timerConfig.intervalId = setInterval(() => {
+        if (timerConfig.remainingSeconds > 0) {
+          timerConfig.remainingSeconds--;
+          updateTimerUI();
+        } else {
+          pauseTimer();
+          playBeepWebAudio();
+
+          if (timerConfig.phase === "focus") {
+            // Registra automaticamente os minutos líquidos estudados na matéria selecionada
+            const studied = timerConfig.focusMinutes;
+            state.focusMinutes[timerConfig.subject] = (state.focusMinutes[timerConfig.subject] || 0) + studied;
+            saveState();
+            showToast(`+${studied} min registrados em ${SUBJECT_META[timerConfig.subject].short}!`, "success");
+
+            // Alterna automaticamente para a pausa
+            timerConfig.phase = "break";
+            timerConfig.remainingSeconds = timerConfig.breakMinutes * 60;
+          } else {
+            showToast("Pausa concluída! Pronto para o próximo bloco.", "info");
+            timerConfig.phase = "focus";
+            timerConfig.remainingSeconds = timerConfig.focusMinutes * 60;
+          }
+          updateTimerUI();
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      timerConfig.isRunning = false;
+      clearInterval(timerConfig.intervalId);
+      updateTimerUI();
+    }
+
+    function switchTimerPhase() {
+      pauseTimer();
+      if (timerConfig.phase === "focus") {
+        timerConfig.phase = "break";
+        timerConfig.remainingSeconds = timerConfig.breakMinutes * 60;
+      } else {
+        timerConfig.phase = "focus";
+        timerConfig.remainingSeconds = timerConfig.focusMinutes * 60;
+      }
+      updateTimerUI();
+    }
+
+    function resetTimer() {
+      pauseTimer();
+      timerConfig.remainingSeconds = (timerConfig.phase === "focus" ? timerConfig.focusMinutes : timerConfig.breakMinutes) * 60;
+      updateTimerUI();
+    }
+
+    // =======================================================================
+    // 9. EXPORTAR / IMPORTAR BACKUP JSON
+    // =======================================================================
+    function openBackupModal() {
+      document.getElementById("modal-title").textContent = "Backup de Segurança (JSON)";
+      document.getElementById("modal-body").innerHTML = `
+        <p class="text-slate-300 text-xs sm:text-sm">
+          Seus dados ficam salvos automaticamente no navegador. Exporte um arquivo <strong>.json</strong> para guardar no seu Telegram ou Google Drive como segurança.
+        </p>
+        <div class="space-y-3 pt-2">
+          <button onclick="downloadBackupJSON()" class="w-full py-2.5 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-obsidian font-bold text-xs sm:text-sm transition">
+            Baixar Backup (.json)
+          </button>
+          <div class="pt-3 border-t border-borderSubtle">
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Restaurar Backup (.json):</label>
+            <input type="file" accept=".json" onchange="uploadBackupJSON(event)" class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-500 file:text-obsidian hover:file:bg-sky-400 cursor-pointer" />
+          </div>
+        </div>
+      `;
+      document.getElementById("modal-footer").innerHTML = `
+        <button onclick="closeModal()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold transition">Fechar</button>
+      `;
+
+      const overlay = document.getElementById("modal-overlay");
+      overlay.classList.remove("hidden");
+      overlay.classList.add("flex");
+    }
+
+    function downloadBackupJSON() {
+      const jsonStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const a = document.createElement("a");
+      a.setAttribute("href", jsonStr);
+      a.setAttribute("download", `backup_base_exatas_eng_software_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Backup JSON exportado!", "success");
+    }
+
+    function uploadBackupJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          if (parsed && Array.isArray(parsed.schedule)) {
+            state = { ...state, ...parsed };
+            saveState();
+            renderSchedule();
+            renderSimulados();
+            closeModal();
+            showToast("Backup restaurado com sucesso!", "success");
+          } else {
+            showToast("Arquivo JSON inválido para esta plataforma.", "warn");
+          }
+        } catch (err) {
+          showToast("Erro ao ler o arquivo JSON.", "warn");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // =======================================================================
+    // 10. INICIALIZAÇÃO
+    // =======================================================================
+    window.addEventListener("DOMContentLoaded", () => {
+      loadState();
+      document.getElementById("sim-date").value = new Date().toISOString().split("T")[0];
+      setTimerSubject("math");
+      renderDashboard();
+      renderSchedule();
+      renderSimulados();
+      window.addEventListener("resize", () => {
+        if (!document.getElementById("tab-simulados").classList.contains("hidden")) {
+          renderSimuladosChart();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
